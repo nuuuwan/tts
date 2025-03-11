@@ -58,14 +58,7 @@ class Speech:
         assert len(self) == 1
         if os.path.exists(self.temp_file_path):
             return self.temp_file_path
-        try:
-            tts = gTTS(self.content_lines[0])
-        except Exception as e:
-            log.error(
-                f'Failed to process "{self.content_lines[0]}": ' + str(e)
-            )
-            return None
-
+        tts = gTTS(self.content_lines[0])
         tts.save(self.temp_file_path)
         log.debug(f"Wrote {self.temp_file_path}")
         return self.temp_file_path
@@ -84,10 +77,16 @@ class Speech:
                 log.debug(f"{i}/{n}) {line}")
                 if len(line.strip()) == 0:
                     continue
-                child_temp_file_path = Speech([line]).write_single()
-                if child_temp_file_path:
-                    child_audio = AudioSegment.from_file(child_temp_file_path)
-                    child_audio_list.append(child_audio)
+
+                try:
+                    child_temp_file_path = Speech([line]).write_single()
+                    if child_temp_file_path:
+                        child_audio = AudioSegment.from_file(
+                            child_temp_file_path
+                        )
+                        child_audio_list.append(child_audio)
+                except Exception as e:
+                    log.error(str(e))
 
             audio = sum(child_audio_list)
             audio.export(self.temp_file_path, format="mp3")
