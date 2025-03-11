@@ -58,7 +58,14 @@ class Speech:
         assert len(self) == 1
         if os.path.exists(self.temp_file_path):
             return self.temp_file_path
-        tts = gTTS(self.content_lines[0])
+        try:
+            tts = gTTS(self.content_lines[0])
+        except Exception as e:
+            log.error(
+                f'Failed to process "{self.content_lines[0]}": ' + str(e)
+            )
+            return None
+
         tts.save(self.temp_file_path)
         log.debug(f"Wrote {self.temp_file_path}")
         return self.temp_file_path
@@ -72,10 +79,15 @@ class Speech:
         if not os.path.exists(self.temp_file_path):
 
             child_audio_list = []
-            for line in self.content_lines:
+            n = len(self.content_lines)
+            for i, line in enumerate(self.content_lines, start=1):
+                log.debug(f"{i}/{n}) {line}")
+                if len(line.strip()) == 0:
+                    continue
                 child_temp_file_path = Speech([line]).write_single()
-                child_audio = AudioSegment.from_file(child_temp_file_path)
-                child_audio_list.append(child_audio)
+                if child_temp_file_path:
+                    child_audio = AudioSegment.from_file(child_temp_file_path)
+                    child_audio_list.append(child_audio)
 
             audio = sum(child_audio_list)
             audio.export(self.temp_file_path, format="mp3")
