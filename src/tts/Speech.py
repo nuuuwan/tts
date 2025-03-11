@@ -88,8 +88,17 @@ class Speech:
                 except Exception as e:
                     log.error(str(e))
 
+            log.debug(f"Combining {len(child_audio_list)} audio files")
             audio = sum(child_audio_list)
             audio.export(self.temp_file_path, format="mp3")
+
+            duration = len(audio) / 1000 / 60
+            word_count = len(self.content.split())
+            speed = word_count / duration
+
+            log.info(
+                f"{duration=:0.2f} minutes, {word_count=:,} words, {speed=:,.0f} wpm"
+            )
 
         shutil.copy(self.temp_file_path, output_path)
         log.info(f"Wrote {output_path}")
