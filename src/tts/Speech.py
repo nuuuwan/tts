@@ -54,11 +54,20 @@ class Speech:
         os.makedirs(temp_dir, exist_ok=True)
         return os.path.join(temp_dir, f"tts-{self.md5}.mp3")
 
+    @staticmethod
+    def clean(text: str) -> str:
+        text = text.replace(".", ".. ")
+        text = text.replace("—", ", ")
+        if len(text) < 20:
+            text += "."
+        return text
+
     def write_single(self):
         assert len(self) == 1
         if os.path.exists(self.temp_file_path):
             return self.temp_file_path
-        tts = gTTS(self.content_lines[0])
+        content_line = Speech.clean(self.content_lines[0])
+        tts = gTTS(content_line)
         tts.save(self.temp_file_path)
         log.debug(f"Wrote {self.temp_file_path}")
         return self.temp_file_path
@@ -88,6 +97,7 @@ class Speech:
                 except Exception as e:
                     log.error(str(e))
 
+            assert len(child_audio_list) > 0
             log.debug(f"Combining {len(child_audio_list)} audio files")
             audio = sum(child_audio_list)
             audio.export(self.temp_file_path, format="mp3")
@@ -102,4 +112,6 @@ class Speech:
 
         shutil.copy(self.temp_file_path, output_path)
         log.info(f"Wrote {output_path}")
+        os.startfile(os.path.dirname(output_path))
+
         return output_path
