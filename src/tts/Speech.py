@@ -112,6 +112,5 @@ class Speech:
 
         shutil.copy(self.temp_file_path, output_path)
         log.info(f"Wrote {output_path}")
-        os.startfile(os.path.dirname(output_path))
-
+        
         return output_path
