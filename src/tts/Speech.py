@@ -31,6 +31,8 @@ class Speech:
             .replace(">", "")
             .strip()
         )
+
+        line = line.encode("ascii", "ignore").decode("utf-8")
         return line
 
     @staticmethod
@@ -38,6 +40,7 @@ class Speech:
         assert file_path.endswith(".md")
         lines = File(file_path).read_lines()
         lines = [Speech.clean_md(line) for line in lines if line.strip()]
+        lines = [line for line in lines if line.strip()]
         return Speech(lines)
 
     @staticmethod
