@@ -53,6 +53,8 @@ class Speech:
             return Speech.from_txt_file(file_path)
         if file_path.endswith(".docx"):
             return Speech.from_docx_file(file_path)
+        if file_path.endswith(".md"):
+            return Speech.from_md_file(file_path)
         raise ValueError(f"Unsupported file type: {file_path}")
 
     def __len__(self):
