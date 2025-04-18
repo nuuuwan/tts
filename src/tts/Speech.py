@@ -23,6 +23,24 @@ class Speech:
         return Speech(lines)
 
     @staticmethod
+    def clean_md(line):
+        line = (
+            line.replace("**", "")
+            .replace("*", "")
+            .replace("#", "")
+            .replace(">", "")
+            .strip()
+        )
+        return line
+
+    @staticmethod
+    def from_md_file(file_path: str):
+        assert file_path.endswith(".md")
+        lines = File(file_path).read_lines()
+        lines = [Speech.clean_md(line) for line in lines if line.strip()]
+        return Speech(lines)
+
+    @staticmethod
     def from_docx_file(file_path: str):
         assert file_path.endswith(".docx")
         doc = Document(file_path)
@@ -112,5 +130,5 @@ class Speech:
 
         shutil.copy(self.temp_file_path, output_path)
         log.info(f"Wrote {output_path}")
-        
+
         return output_path
