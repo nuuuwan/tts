@@ -29,6 +29,7 @@ class Speech:
             .replace("*", "")
             .replace("#", "")
             .replace(">", "")
+            .replace("...", "")
             .strip()
         )
 
