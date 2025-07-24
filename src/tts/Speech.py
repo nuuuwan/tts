@@ -96,42 +96,48 @@ class Speech:
         log.debug(f"Wrote {self.temp_file_path}")
         return self.temp_file_path
 
+    @staticmethod
+    def __build_child_audio__(line):
+        try:
+            child_temp_file_path = Speech([line]).write_single()
+            if child_temp_file_path:
+                child_audio = AudioSegment.from_file(child_temp_file_path)
+                return child_audio
+        except Exception as e:
+            log.error(str(e))
+            return None
+
+    def __write_inner__(self):
+        child_audio_list = []
+        n = len(self.content_lines)
+        for i, line in enumerate(self.content_lines, start=1):
+            log.debug(f"{i}/{n}) {line}")
+            if len(line.strip()) == 0:
+                continue
+            child_audio = self.__build_child_audio__(line)
+            if child_audio:
+                child_audio_list.append(child_audio)
+
+        assert len(child_audio_list) > 0
+        log.debug(f"Combining {len(child_audio_list)} audio files")
+        audio = sum(child_audio_list)
+        audio.export(self.temp_file_path, format="mp3")
+
+        duration = len(audio) / 1000 / 60
+        word_count = len(self.content.split())
+        speed = word_count / duration
+        log.info(
+            f"{duration=:0.2f} minutes, {word_count=:,} words,"
+            + f" {speed=:,.0f} wpm"
+        )
+
     def write(self, output_path: str):
         assert output_path.endswith(".mp3")
         if len(self) == 1:
             return self.write_single()
 
         if not os.path.exists(self.temp_file_path):
-
-            child_audio_list = []
-            n = len(self.content_lines)
-            for i, line in enumerate(self.content_lines, start=1):
-                log.debug(f"{i}/{n}) {line}")
-                if len(line.strip()) == 0:
-                    continue
-
-                try:
-                    child_temp_file_path = Speech([line]).write_single()
-                    if child_temp_file_path:
-                        child_audio = AudioSegment.from_file(
-                            child_temp_file_path
-                        )
-                        child_audio_list.append(child_audio)
-                except Exception as e:
-                    log.error(str(e))
-            assert len(child_audio_list) > 0
-            log.debug(f"Combining {len(child_audio_list)} audio files")
-            audio = sum(child_audio_list)
-            audio.export(self.temp_file_path, format="mp3")
-
-            duration = len(audio) / 1000 / 60
-            word_count = len(self.content.split())
-            speed = word_count / duration
-
-            log.info(
-                f"{duration=:0.2f} minutes, {word_count=:,} words,"
-                + f" {speed=:,.0f} wpm"
-            )
+            self.__write_inner__()
 
         shutil.copy(self.temp_file_path, output_path)
         log.info(f"Wrote {output_path}")
