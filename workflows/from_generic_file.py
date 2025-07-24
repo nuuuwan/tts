@@ -12,4 +12,6 @@ if __name__ == "__main__":
         sys.exit(1)
     file_path = sys.argv[1]
     output_path = sys.argv[2]
+    print(f"{file_path=}")
+    print(f"{output_path=}")
     Speech.from_generic_file(file_path).write(output_path)
