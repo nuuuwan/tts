@@ -98,7 +98,6 @@ class Speech:
 
     def write(self, output_path: str):
         assert output_path.endswith(".mp3")
-
         if len(self) == 1:
             return self.write_single()
 
@@ -120,7 +119,6 @@ class Speech:
                         child_audio_list.append(child_audio)
                 except Exception as e:
                     log.error(str(e))
-
             assert len(child_audio_list) > 0
             log.debug(f"Combining {len(child_audio_list)} audio files")
             audio = sum(child_audio_list)
@@ -131,7 +129,8 @@ class Speech:
             speed = word_count / duration
 
             log.info(
-                f"{duration=:0.2f} minutes, {word_count=:,} words, {speed=:,.0f} wpm"
+                f"{duration=:0.2f} minutes, {word_count=:,} words,"
+                + f" {speed=:,.0f} wpm"
             )
 
         shutil.copy(self.temp_file_path, output_path)
